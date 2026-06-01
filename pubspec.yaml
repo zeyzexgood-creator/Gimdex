@@ -1,18 +1,15 @@
-name: mynest
-description: "A new Flutter project created with DevStudio."
+name: hack_slash_game
+description: A hack and slash game
 publish_to: 'none'
-
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.3.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
   flame: ^1.15.0
-  flame_audio: ^2.1.0
 
 dev_dependencies:
   flutter_test:
