@@ -1,17 +1,13 @@
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'sword.dart';
 
 class Player extends RectangleComponent {
-  final double speed = 300;
-  Vector2 velocity = Vector2.zero();
-  late Sword sword;
-  double attackCooldown = 0;
-  static const double attackDelay = 0.3;
-
-  Player({required Vector2 position}) : super(
-    size: Vector2(40, 40),
-    position: position,
+  final double speed = 400;
+  double attackTimer = 0;
+  bool isAttacking = false;
+  
+  Player() : super(
+    size: Vector2(45, 45),
     paint: Paint()..color = Colors.blue,
     anchor: Anchor.center,
   );
@@ -19,38 +15,41 @@ class Player extends RectangleComponent {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    // Tambahkan sword
-    sword = Sword(player: this);
-    parent?.add(sword);
   }
 
   void move(Vector2 delta) {
-    position += delta * speed / 100;
-    position.x = position.x.clamp(40, gameRef.size.x - 40);
-    position.y = position.y.clamp(40, gameRef.size.y - 40);
+    position += delta * speed / 60;
+    
+    // Batasi di layar
+    final game = gameRef;
+    position.x = position.x.clamp(size.x/2, game.size.x - size.x/2);
+    position.y = position.y.clamp(size.y/2, game.size.y - size.y/2);
   }
 
   void attack() {
-    if (attackCooldown <= 0) {
-      sword.slash();
-      attackCooldown = attackDelay;
+    if (attackTimer <= 0) {
+      isAttacking = true;
+      attackTimer = 0.3;
+      paint.color = Colors.lightBlue;
     }
   }
 
   Rect get hitbox => Rect.fromCenter(
     center: Offset(position.x, position.y),
-    width: size.x,
-    height: size.y,
+    width: size.x + 25, // Sword range
+    height: size.y + 25,
   );
-
-  Rect getSwordHitbox() => sword.getHitbox();
 
   @override
   void update(double dt) {
     super.update(dt);
-    if (attackCooldown > 0) {
-      attackCooldown -= dt;
-      if (attackCooldown <= 0) sword.reset();
+    
+    if (attackTimer > 0) {
+      attackTimer -= dt;
+      if (attackTimer <= 0) {
+        isAttacking = false;
+        paint.color = Colors.blue;
+      }
     }
   }
 }
