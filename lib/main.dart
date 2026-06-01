@@ -15,7 +15,26 @@ class MyApp extends StatelessWidget {
       title: 'Hack & Slash',
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: GameWidget(game: HackSlashGame()),
+        body: Stack(
+          children: [
+            GameWidget(game: HackSlashGame()),
+            Positioned(
+              top: 20,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text(
+                  '🎮 Gerakkan mouse | Klik untuk serang',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
