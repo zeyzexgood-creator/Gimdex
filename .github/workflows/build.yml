@@ -19,18 +19,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Flutter
+      - name: Setup Flutter (Versi Stabil untuk Flame)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.19.6'  # Ganti dari 3.24.0
           channel: 'stable'
           cache: true
 
       - name: Inject Android folder
+        if: false  # Skip karena sudah ada
         run: flutter create --platforms=android --project-name gimf .
+
+      - name: Clean project
+        run: flutter clean
 
       - name: Install Dependencies
         run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze
 
       - name: Build Android Release APK
         run: flutter build apk --release
@@ -39,7 +46,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: gimf-apk
+          name: hack-slash-game-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
           if-no-files-found: error
