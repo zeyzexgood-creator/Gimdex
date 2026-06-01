@@ -103,11 +103,13 @@ class HackSlashGame extends FlameGame {
     }
   }
 
+  // Flame 1.15.0 menggunakan onTapDown dengan parameter berbeda
   @override
-  void onTapUp(int pointerId, TapUpInfo info) {
-    // Pindah ke posisi tap
-    targetPosition = info.eventPosition.game;
-    attack(); // Juga serang saat tap
-    super.onTapUp(pointerId, info);
+  void onTapDown(int pointerId, TapDownDetails details) {
+    // Konversi ke Vector2
+    final tapPosition = Vector2(details.localPosition.dx, details.localPosition.dy);
+    targetPosition = tapPosition;
+    attack();
+    super.onTapDown(pointerId, details);
   }
 }
