@@ -1,16 +1,14 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
 import 'player.dart';
 import 'enemy.dart';
 
-class HackSlashGame extends FlameGame with DragCallbacks, TapCallbacks {
+class HackSlashGame extends FlameGame {
   late Player player;
   final List<Enemy> enemies = [];
   int score = 0;
   late TextComponent scoreText;
-  Vector2? lastDragPosition;
 
   @override
   Future<void> onLoad() async {
@@ -29,7 +27,7 @@ class HackSlashGame extends FlameGame with DragCallbacks, TapCallbacks {
     );
     add(scoreText);
 
-    // Spawn enemies
+    // Spawn enemies setiap 1.2 detik
     add(TimerComponent(
       period: 1.2,
       repeat: true,
@@ -40,19 +38,22 @@ class HackSlashGame extends FlameGame with DragCallbacks, TapCallbacks {
   void spawnEnemy() {
     if (enemies.length < 10) {
       final enemy = Enemy();
-      enemy.position = randomSpawnPosition();
+      final rand = DateTime.now().millisecondsSinceEpoch % 4;
+      switch (rand) {
+        case 0:
+          enemy.position = Vector2(-40, size.y / 2);
+          break;
+        case 1:
+          enemy.position = Vector2(size.x + 40, size.y / 2);
+          break;
+        case 2:
+          enemy.position = Vector2(size.x / 2, -40);
+          break;
+        default:
+          enemy.position = Vector2(size.x / 2, size.y + 40);
+      }
       enemies.add(enemy);
       add(enemy);
-    }
-  }
-
-  Vector2 randomSpawnPosition() {
-    final rand = DateTime.now().millisecondsSinceEpoch % 4;
-    switch (rand) {
-      case 0: return Vector2(-40, size.y / 2);
-      case 1: return Vector2(size.x + 40, size.y / 2);
-      case 2: return Vector2(size.x / 2, -40);
-      default: return Vector2(size.x / 2, size.y + 40);
     }
   }
 
@@ -74,25 +75,34 @@ class HackSlashGame extends FlameGame with DragCallbacks, TapCallbacks {
   }
 
   @override
-  void onDragUpdate(DragUpdateEvent event) {
-    player.move(event.delta.game);
-    super.onDragUpdate(event);
-  }
-
-  @override
-  void onTapDown(TapDownEvent event) {
-    attack();
-    super.onTapDown(event);
-  }
-
-  @override
   void update(double dt) {
     super.update(dt);
     
-    // Update posisi semua enemy
+    // Enemy bergerak ke arah player
     for (var enemy in enemies) {
       final direction = (player.position - enemy.position).normalized();
       enemy.position += direction * enemy.speed * dt;
     }
+  }
+
+  @override
+  void onMouseMove(PointerHoverInfo info) {
+    // Player mengikuti mouse
+    player.position = info.eventPosition.game;
+    player.position.x = player.position.x.clamp(
+      player.size.x/2, 
+      size.x - player.size.x/2
+    );
+    player.position.y = player.position.y.clamp(
+      player.size.y/2, 
+      size.y - player.size.y/2
+    );
+    super.onMouseMove(info);
+  }
+
+  @override
+  void onTapDown(int pointerId, TapDownInfo info) {
+    attack();
+    super.onTapDown(pointerId, info);
   }
 }
