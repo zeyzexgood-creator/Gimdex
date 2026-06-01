@@ -9,12 +9,14 @@ class HackSlashGame extends FlameGame {
   final List<Enemy> enemies = [];
   int score = 0;
   late TextComponent scoreText;
+  Vector2 targetPosition = Vector2.zero();
 
   @override
   Future<void> onLoad() async {
     // Player
     player = Player();
     player.position = size / 2;
+    targetPosition = size / 2;
     add(player);
 
     // Score text
@@ -27,7 +29,7 @@ class HackSlashGame extends FlameGame {
     );
     add(scoreText);
 
-    // Spawn enemies setiap 1.2 detik
+    // Spawn enemies
     add(TimerComponent(
       period: 1.2,
       repeat: true,
@@ -78,17 +80,13 @@ class HackSlashGame extends FlameGame {
   void update(double dt) {
     super.update(dt);
     
-    // Enemy bergerak ke arah player
-    for (var enemy in enemies) {
-      final direction = (player.position - enemy.position).normalized();
-      enemy.position += direction * enemy.speed * dt;
+    // Gerakan player ke target position (smooth)
+    final direction = (targetPosition - player.position);
+    if (direction.length > 5) {
+      player.position += direction.normalized() * 300 * dt;
     }
-  }
-
-  @override
-  void onMouseMove(PointerHoverInfo info) {
-    // Player mengikuti mouse
-    player.position = info.eventPosition.game;
+    
+    // Batasi posisi player
     player.position.x = player.position.x.clamp(
       player.size.x/2, 
       size.x - player.size.x/2
@@ -97,12 +95,19 @@ class HackSlashGame extends FlameGame {
       player.size.y/2, 
       size.y - player.size.y/2
     );
-    super.onMouseMove(info);
+    
+    // Enemy bergerak ke player
+    for (var enemy in enemies) {
+      final directionEnemy = (player.position - enemy.position).normalized();
+      enemy.position += directionEnemy * enemy.speed * dt;
+    }
   }
 
   @override
-  void onTapDown(int pointerId, TapDownInfo info) {
-    attack();
-    super.onTapDown(pointerId, info);
+  void onTapUp(int pointerId, TapUpInfo info) {
+    // Pindah ke posisi tap
+    targetPosition = info.eventPosition.game;
+    attack(); // Juga serang saat tap
+    super.onTapUp(pointerId, info);
   }
 }
