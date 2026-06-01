@@ -1,45 +1,45 @@
 name: Flutter Release Build
 
 on:
-push:
-branches: [ "main", "master" ]
-workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
-build:
-runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-steps:
-- name: Checkout code
-uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-- name: Setup Java
-uses: actions/setup-java@v4
-with:
-distribution: 'temurin'
-java-version: '17'
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-- name: Setup Flutter
-uses: subosito/flutter-action@v2
-with:
-flutter-version: '3.24.0'
-channel: 'stable'
-cache: true
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
 
-- name: Inject Android folder
-run: flutter create --platforms=android --project-name gimf .
+      - name: Inject Android folder
+        run: flutter create --platforms=android --project-name gimf .
 
-- name: Install Dependencies
-run: flutter pub get
+      - name: Install Dependencies
+        run: flutter pub get
 
-- name: Build Android Release APK
-run: flutter build apk --release
+      - name: Build Android Release APK
+        run: flutter build apk --release
 
-- name: Upload Flutter APK
-if: success()
-uses: actions/upload-artifact@v4
-with:
-name: gimf-apk
-path: build/app/outputs/flutter-apk/app-release.apk
-retention-days: 30
-if-no-files-found: error
+      - name: Upload Flutter APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gimf-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          if-no-files-found: error
