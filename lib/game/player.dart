@@ -2,7 +2,6 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 class Player extends RectangleComponent {
-  final double speed = 400;
   double attackTimer = 0;
   bool isAttacking = false;
   
@@ -11,20 +10,6 @@ class Player extends RectangleComponent {
     paint: Paint()..color = Colors.blue,
     anchor: Anchor.center,
   );
-
-  @override
-  Future<void> onLoad() async {
-    super.onLoad();
-  }
-
-  void move(Vector2 delta) {
-    position += delta * speed / 60;
-    
-    // Batasi di layar
-    final game = gameRef;
-    position.x = position.x.clamp(size.x/2, game.size.x - size.x/2);
-    position.y = position.y.clamp(size.y/2, game.size.y - size.y/2);
-  }
 
   void attack() {
     if (attackTimer <= 0) {
@@ -36,7 +21,7 @@ class Player extends RectangleComponent {
 
   Rect get hitbox => Rect.fromCenter(
     center: Offset(position.x, position.y),
-    width: size.x + 25, // Sword range
+    width: size.x + 25, // Radius serangan
     height: size.y + 25,
   );
 
