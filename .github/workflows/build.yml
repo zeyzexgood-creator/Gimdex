@@ -19,16 +19,28 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Flutter (Versi Stabil untuk Flame)
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'  # Ganti dari 3.24.0
+          flutter-version: '3.19.6'
           channel: 'stable'
           cache: true
 
-      - name: Inject Android folder
-        if: false  # Skip karena sudah ada
-        run: flutter create --platforms=android --project-name gimf .
+      - name: Update Package Name and App Name
+        run: |
+          # Update package name di android/app/build.gradle
+          sed -i 's/namespace "com\.example.*"/namespace "com.nest"/' android/app/build.gradle
+          sed -i 's/applicationId "com\.example.*"/applicationId "com.nest"/' android/app/build.gradle
+          
+          # Update app name di AndroidManifest.xml
+          sed -i 's/android:label=".*"/android:label="Nest"/' android/app/src/main/AndroidManifest.xml
+          
+          # Update app name di strings.xml
+          mkdir -p android/app/src/main/res/values
+          echo '<?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Nest</string>
+          </resources>' > android/app/src/main/res/values/strings.xml
 
       - name: Clean project
         run: flutter clean
@@ -46,7 +58,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: hack-slash-game-apk
+          name: nest-music-player-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
           if-no-files-found: error
