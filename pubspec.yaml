@@ -1,5 +1,5 @@
-name: hack_slash_game
-description: A hack and slash game
+name: music_player
+description: A simple music player app
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,12 +9,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flame: ^1.15.0
+  audioplayers: ^5.2.1
+  assets_audio_player: ^3.1.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/music/
+    - assets/images/
