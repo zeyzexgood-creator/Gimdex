@@ -29,18 +29,25 @@ jobs:
       - name: Update Package Name and App Name
         run: |
           # Update package name di android/app/build.gradle
-          sed -i 's/namespace "com\.example.*"/namespace "com.nest"/' android/app/build.gradle
-          sed -i 's/applicationId "com\.example.*"/applicationId "com.nest"/' android/app/build.gradle
+          if grep -q "namespace" android/app/build.gradle; then
+            sed -i 's/namespace "com\.example[^"]*"/namespace "com.nest"/' android/app/build.gradle
+            sed -i 's/applicationId "com\.example[^"]*"/applicationId "com.nest"/' android/app/build.gradle
+          else
+            sed -i '/android {/a \    namespace "com.nest"' android/app/build.gradle
+            sed -i 's/applicationId "com\.example[^"]*"/applicationId "com.nest"/' android/app/build.gradle
+          fi
           
           # Update app name di AndroidManifest.xml
-          sed -i 's/android:label=".*"/android:label="Nest"/' android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:label="[^"]*"/android:label="Nest"/' android/app/src/main/AndroidManifest.xml
           
           # Update app name di strings.xml
           mkdir -p android/app/src/main/res/values
-          echo '<?xml version="1.0" encoding="utf-8"?>
+          cat > android/app/src/main/res/values/strings.xml << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
           <resources>
               <string name="app_name">Nest</string>
-          </resources>' > android/app/src/main/res/values/strings.xml
+          </resources>
+          EOF
 
       - name: Clean project
         run: flutter clean
