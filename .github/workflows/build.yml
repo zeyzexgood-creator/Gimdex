@@ -1,3 +1,4 @@
+# Workflow yang lebih simple tanpa update otomatis
 name: Flutter Release Build
 
 on:
@@ -10,149 +11,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+          
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.6'
           channel: 'stable'
           cache: true
-
-      - name: Update Package Name and App Name
-        run: |
-          # Cek struktur project
-          echo "Listing android/app directory:"
-          ls -la android/app/ || echo "Directory not found"
           
-          # Coba cari file build.gradle yang benar
-          if [ -f "android/app/build.gradle" ]; then
-            BUILD_FILE="android/app/build.gradle"
-          elif [ -f "android/app/build.gradle.kts" ]; then
-            BUILD_FILE="android/app/build.gradle.kts"
-          else
-            echo "No build.gradle file found! Creating default..."
-            # Buat file build.gradle default jika tidak ada
-            mkdir -p android/app
-            cat > android/app/build.gradle << 'EOF'
-            def localProperties = new Properties()
-            def localPropertiesFile = rootProject.file('local.properties')
-            if (localPropertiesFile.exists()) {
-                localPropertiesFile.withReader('UTF-8') { reader ->
-                    localProperties.load(reader)
-                }
-            }
-
-            def flutterRoot = localProperties.getProperty('flutter.sdk')
-            if (flutterRoot == null) {
-                throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
-            }
-
-            apply plugin: 'com.android.application'
-            apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
-            android {
-                namespace "com.nest"
-                compileSdkVersion 34
-
-                compileOptions {
-                    sourceCompatibility JavaVersion.VERSION_1_8
-                    targetCompatibility JavaVersion.VERSION_1_8
-                }
-
-                defaultConfig {
-                    applicationId "com.nest"
-                    minSdkVersion 21
-                    targetSdkVersion 34
-                    versionCode 1
-                    versionName "1.0"
-                }
-
-                buildTypes {
-                    release {
-                        signingConfig signingConfigs.debug
-                    }
-                }
-            }
-
-            flutter {
-                source '../..'
-            }
-            EOF
-            BUILD_FILE="android/app/build.gradle"
-          fi
-          
-          # Update namespace dan applicationId
-          if [ -f "$BUILD_FILE" ]; then
-            if grep -q "namespace" "$BUILD_FILE"; then
-              sed -i 's/namespace "com\.example[^"]*"/namespace "com.nest"/' "$BUILD_FILE"
-              sed -i 's/applicationId "com\.example[^"]*"/applicationId "com.nest"/' "$BUILD_FILE"
-            else
-              sed -i '/android {/a \    namespace "com.nest"' "$BUILD_FILE"
-              sed -i 's/applicationId "com\.example[^"]*"/applicationId "com.nest"/' "$BUILD_FILE"
-            fi
-            echo "Updated $BUILD_FILE"
-          fi
-          
-          # Update app name di AndroidManifest.xml
-          if [ -f "android/app/src/main/AndroidManifest.xml" ]; then
-            sed -i 's/android:label="[^"]*"/android:label="Nest"/' android/app/src/main/AndroidManifest.xml
-          else
-            mkdir -p android/app/src/main
-            cat > android/app/src/main/AndroidManifest.xml << 'EOF'
-            <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-                <application
-                    android:label="Nest"
-                    android:name="${applicationName}"
-                    android:icon="@mipmap/ic_launcher">
-                    <activity
-                        android:name=".MainActivity"
-                        android:exported="true">
-                        <intent-filter>
-                            <action android:name="android.intent.action.MAIN"/>
-                            <category android:name="android.intent.category.LAUNCHER"/>
-                        </intent-filter>
-                    </activity>
-                </application>
-            </manifest>
-            EOF
-          fi
-          
-          # Update app name di strings.xml
-          mkdir -p android/app/src/main/res/values
-          cat > android/app/src/main/res/values/strings.xml << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <string name="app_name">Nest</string>
-          </resources>
-          EOF
-          
-          echo "Package and app name updated successfully"
-
-      - name: Clean project
-        run: flutter clean
-
-      - name: Install Dependencies
-        run: flutter pub get
-
-      - name: Analyze code
-        run: flutter analyze
-
-      - name: Build Android Release APK
-        run: flutter build apk --release
-
-      - name: Upload Flutter APK
-        if: success()
-        uses: actions/upload-artifact@v4
+      - run: flutter clean
+      - run: flutter pub get
+      - run: flutter build apk --release
+      
+      - uses: actions/upload-artifact@v4
         with:
           name: nest-music-player-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
-          if-no-files-found: error
